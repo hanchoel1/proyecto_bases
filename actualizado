@@ -1,3 +1,5 @@
+-------Directorios blobs------
+
 create or replace  directory DIR_LOGO as 'C:\imagenes\logo_bomboneria\';
 create or replace  directory Chocolates  as 'C:\imagenes\chocolates\';
 create or replace  directory Logos_productor_cho as 'C:\imagenes\logo_productor_cho\';
@@ -110,6 +112,7 @@ create table Bomboneria (
   pais_id number not null,
   constraint fk_ciudad Foreign Key (ciudad_id,pais_id) references Ciudad(id_ciudad,pais_id),
   constraint pk_bomboneria primary key (id_bomboneria)
+
 )nested table horas_atencion store as horarios_nt_1
  nested table precios_especiales store as preciosesp_nt_1;
 
@@ -124,7 +127,8 @@ create table Catalogo_Bombones (
     ingredientes ingredientes_va,
     votos votos_nt,
     constraint pk_catalogo primary key (id_bombon,id_bomboneria),
-    constraint fk_bomboneria foreign key (id_bomboneria) references Bomboneria(id_bomboneria)
+    constraint fk_bomboneria foreign key (id_bomboneria) references Bomboneria(id_bomboneria),
+    constraint check_bombon check (tipo_chocolate IN ('negro','blanco','conleche'))
 )nested table votos store as  votos_nt_1;
 
 
@@ -159,7 +163,8 @@ create table CONTRATO (
     id_bomboneria number not null,
     constraint pk_contrato primary key (id_contrato,id_proveedor,id_bomboneria),
     constraint  fk1_contrato foreign key (id_proveedor) references PROVEEDOR_CACAO(id_proveedor_cacao),
-    constraint fk2_contrato foreign key (id_bomboneria) references Bomboneria(id_bomboneria)
+    constraint fk2_contrato foreign key (id_bomboneria) references Bomboneria(id_bomboneria),
+    constraint check_contrato check (estatus_contrato IN ('activo','suspendido'))
 );
 
 create table TIPO_CACAO(
@@ -169,7 +174,9 @@ create table TIPO_CACAO(
     descripcion varchar2(250) not null,
     id_pais number,
     constraint pk_tipo_cacao primary key (id_tipocacao),
-    constraint fk1 foreign key (id_pais) references Pais(id_pais)
+    constraint fk1 foreign key (id_pais) references Pais(id_pais),
+    constraint check_cacao check (tipo IN ('suave','fuerte'))
+
 );
 
 create table PROVEEDOR_CHOCOLATE (
@@ -193,7 +200,8 @@ create table CATALOGO_CHOCOLATE (
     clasificacion clasificacion,
     id_proveedor number,
     constraint pk primary key (id_proveedor,id_chocolate),
-    constraint fk foreign key (id_proveedor) references PROVEEDOR_CHOCOLATE(id_proveedor_cho)
+    constraint fk foreign key (id_proveedor) references PROVEEDOR_CHOCOLATE(id_proveedor_cho),
+    constraint check_choco check (tipo IN ('negro','blanco','conleche'))
 )nested table temperatura_fundicion store as tem_nt_1;
 
 
@@ -249,7 +257,8 @@ create table PEDIDO(
     id_bomboneria number not null,
     constraint pk_pedido primary key(id_pedido,id_proveedor_cho,id_bomboneria),
     constraint fk1_pedido foreign key (id_proveedor_cho) references PROVEEDOR_CHOCOLATE(id_proveedor_cho),
-    constraint fk2_pedido foreign key (id_bomboneria) references Bomboneria(id_bomboneria)
+    constraint fk2_pedido foreign key (id_bomboneria) references Bomboneria(id_bomboneria),
+    constraint check_pedido check ( estatus in ('pendiente','recibido','pagado', 'cancelado por productor', 'cancelado bomboneria','confirmado','pendiente envio','enviado'))
 );
 
 create table FACTURA_PEDIDO (
@@ -394,3 +403,31 @@ create table FORMULA(
     constraint pk_formula primary key(id_bomboneriafk),
     constraint fk_formula foreign key (id_bomboneriafk) references Bomboneria(id_bomboneria)
 );
+
+
+
+
+
+
+
+
+
+
+
+----- inserts manuales  -------------
+insert into PAIS(id_pais, nombre) values (1,'venezuela');
+insert into CIUDAD(id_ciudad, nombre, pais_id) values (1,'caracas',1);
+
+
+
+insert into BOMBONERIA(id_bomboneria, nombre, logo, fecha_fun, direccion, horas_atencion, telefonos, email, dir_paginaweb, precioKg, precios_especiales, ciudad_id) values (1,'zisnella',bfilename('DIR_LOGO','img2.png'),TO_DATE('1989-12-09','YYYY-MM-DD'),null,null,null,null,null,12,null,1);
+commit;
+delete from BOMBONERIA where id_bomboneria = 1;
+commit;
+
+select * from BOMBONERIA;
+
+
+
+
+
